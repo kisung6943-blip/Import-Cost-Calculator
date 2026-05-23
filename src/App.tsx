@@ -472,7 +472,7 @@ export default function App() {
 
         {/* Dashboard Statistics Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 relative z-10">
-          <div className="bg-indigo-650 text-white rounded-2xl p-4 shadow-sm scale-100 hover:scale-[1.01] transition-transform duration-300 border border-indigo-700">
+          <div className="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm scale-100 hover:scale-[1.01] transition-transform duration-300 border border-indigo-700">
             <span className="text-[10px] font-bold text-indigo-200 block tracking-wider uppercase">총 원화 부대비용 포함 지출액 (A)</span>
             <div className="flex items-baseline gap-1 mt-2">
               <span className="text-3xl font-black text-white font-mono tracking-tight">
@@ -605,10 +605,10 @@ export default function App() {
                               type="text"
                               value={item.name}
                               onChange={(e) => handleEditItem(item.id, 'name', e.target.value)}
-                              className={`w-full bg-transparent border-b border-transparent focus:outline-none transition-all py-1 font-bold text-sm ${
+                              className={`w-full bg-white hover:bg-slate-50 border border-slate-200/80 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all px-2.5 py-1.5 rounded-lg font-bold text-sm shadow-2xs ${
                                 isAmortized 
-                                  ? 'text-amber-900 focus:border-amber-500/30' 
-                                  : 'text-teal-900 focus:border-teal-500/30'
+                                  ? 'text-amber-900 focus:border-amber-500' 
+                                  : 'text-teal-900 focus:border-teal-500'
                               }`}
                               placeholder="품목명 입력"
                               id={`item-name-${item.id}`}
@@ -617,7 +617,7 @@ export default function App() {
                               type="text"
                               value={item.note || ''}
                               onChange={(e) => handleEditItem(item.id, 'note', e.target.value)}
-                              className="w-full text-[10px] text-slate-400 bg-transparent border-b border-transparent hover:border-slate-300/30 focus:border-slate-400 focus:outline-none transition-all mt-0.5"
+                              className="w-full text-[10px] text-slate-500 bg-white/60 hover:bg-slate-50 border border-slate-200/50 focus:bg-white focus:border-slate-400 focus:outline-none transition-all px-2 py-1 rounded-md mt-1.5 shadow-3xs"
                               placeholder="비고/원산지 메모"
                               id={`item-note-${item.id}`}
                             />
