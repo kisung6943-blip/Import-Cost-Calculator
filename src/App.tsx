@@ -24,11 +24,14 @@ import {
   Briefcase,
   ExternalLink,
   ChevronRight,
-  TrendingDown
+  TrendingDown,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
 import { SAMPLE_SESSIONS } from './data';
 import { ImportShipmentSession, ImportItem, CurrencyType, AllocationMethod } from './types';
 import { calculateImportCosts, calculateCommissionKrw } from './lib/calculator';
+import { supabase } from './lib/supabase';
 
 export default function App() {
   // Load initial sessions from localStorage or default sample sessions
@@ -61,7 +64,10 @@ export default function App() {
     return SAMPLE_SESSIONS;
   });
 
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(SAMPLE_SESSIONS[0].id);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>(() => {
+    return localStorage.getItem('import_selected_session_id') || SAMPLE_SESSIONS[0].id;
+  });
+
   const [session, setSession] = useState<ImportShipmentSession>(() => {
     return sessions.find(s => s.id === selectedSessionId) || sessions[0];
   });
@@ -79,13 +85,98 @@ export default function App() {
     return { 'item-1': 5900 };
   });
 
-  // Keep internal session updated when selectedSessionId shifts
+  // Cloud synchronization status states
+  const [syncStatus, setSyncStatus] = useState<'syncing' | 'done' | 'error' | 'local'>('local');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 1. Fetch initial data from Supabase
   useEffect(() => {
+    const fetchCloudData = async () => {
+      setSyncStatus('syncing');
+      try {
+        const { data: dbData, error } = await supabase
+          .from('import_cost_sessions')
+          .select('*')
+          .eq('id', 'default_sessions')
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
+        if (dbData) {
+          if (dbData.sessions) {
+            setSessions(dbData.sessions);
+            localStorage.setItem('import_sessions', JSON.stringify(dbData.sessions));
+            const lastActive = localStorage.getItem('import_selected_session_id');
+            const found = dbData.sessions.find((s: any) => s.id === lastActive) || dbData.sessions[0];
+            if (found) {
+              setSelectedSessionId(found.id);
+              setSession(found);
+            }
+          }
+          if (dbData.selling_prices) {
+            setSellingPrices(dbData.selling_prices);
+            localStorage.setItem('import_selling_prices', JSON.stringify(dbData.selling_prices));
+          }
+          setSyncStatus('done');
+        } else {
+          // If no row found, upload our current local storage data to populate the cloud db
+          await supabase
+            .from('import_cost_sessions')
+            .upsert({
+              id: 'default_sessions',
+              sessions: sessions,
+              selling_prices: sellingPrices,
+              updated_at: new Date().toISOString()
+            });
+          setSyncStatus('done');
+        }
+      } catch (e) {
+        console.error("Cloud database fetch failed. Running in Local Mode.", e);
+        setSyncStatus('local');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCloudData();
+  }, []);
+
+  // 2. Keep internal session updated when selectedSessionId shifts
+  useEffect(() => {
+    localStorage.setItem('import_selected_session_id', selectedSessionId);
     const found = sessions.find(s => s.id === selectedSessionId);
     if (found) {
       setSession(found);
     }
   }, [selectedSessionId, sessions]);
+
+  // 3. Debounced Auto-Save to Supabase
+  useEffect(() => {
+    if (isLoading) return;
+
+    const saveCloudData = async () => {
+      setSyncStatus('syncing');
+      try {
+        const { error } = await supabase
+          .from('import_cost_sessions')
+          .upsert({
+            id: 'default_sessions',
+            sessions: sessions,
+            selling_prices: sellingPrices,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+        setSyncStatus('done');
+      } catch (e) {
+        console.error("Cloud database auto-save failed.", e);
+        setSyncStatus('error');
+      }
+    };
+
+    const debounceId = setTimeout(saveCloudData, 1500);
+    return () => clearTimeout(debounceId);
+  }, [sessions, sellingPrices, isLoading]);
 
   // Persist sessions and selling prices when changed
   const saveSessions = (updatedSessions: ImportShipmentSession[]) => {
@@ -398,6 +489,34 @@ export default function App() {
             </div>
 
             <div className="flex items-center space-x-2">
+              {/* Cloud Sync Status Indicator */}
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium mr-1.5">
+                {syncStatus === 'syncing' && (
+                  <>
+                    <Cloud className="h-3.5 w-3.5 text-indigo-500 animate-pulse" />
+                    <span className="text-indigo-600 font-bold">구름 동기화 중...</span>
+                  </>
+                )}
+                {syncStatus === 'done' && (
+                  <>
+                    <Cloud className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-emerald-600 font-bold">구름 동기화 완료 ☁️</span>
+                  </>
+                )}
+                {syncStatus === 'error' && (
+                  <>
+                    <CloudOff className="h-3.5 w-3.5 text-red-500 animate-bounce" />
+                    <span className="text-red-600 font-bold">동기화 오류</span>
+                  </>
+                )}
+                {syncStatus === 'local' && (
+                  <>
+                    <CloudOff className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="text-slate-500 font-bold">로컬 전용 모드</span>
+                  </>
+                )}
+              </div>
+
               <button
                 onClick={handleResetToDefault}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors text-xs font-medium rounded-lg"
