@@ -418,23 +418,29 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 justify-end">
-            <input
-              type="text"
-              value={session.title}
-              onChange={(e) => updateSession(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="세션 제목 편집"
-              className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 w-44 md:w-56"
-              id="session-title-input"
-            />
-            <input
-              type="text"
-              value={session.date}
-              onChange={(e) => updateSession(prev => ({ ...prev, date: e.target.value }))}
-              placeholder="YYYY-MM-DD"
-              className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 w-28 text-center"
-              id="session-date-input"
-            />
+          <div className="flex items-center gap-3 justify-end flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">✏️ 정산명:</span>
+              <input
+                type="text"
+                value={session.title}
+                onChange={(e) => updateSession(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="세션 제목 편집"
+                className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 w-44 md:w-56"
+                id="session-title-input"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">📅 입고일:</span>
+              <input
+                type="text"
+                value={session.date}
+                onChange={(e) => updateSession(prev => ({ ...prev, date: e.target.value }))}
+                placeholder="YYYY-MM-DD"
+                className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 w-28 text-center"
+                id="session-date-input"
+              />
+            </div>
             <button
               onClick={handleDuplicateSession}
               className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg transition-colors"
