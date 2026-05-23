@@ -1,0 +1,6 @@
+{
+  "name": "수입원가 계산기",
+  "description": "수입 상품의 외화 대금, 송금환율, 대행 수수료, 관세 및 부대비용을 자동 배부하여 정확한 품목별 개당 수입 원가를 산출하고 판매 마진을 계산해주는 전문 정산 도구입니다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
