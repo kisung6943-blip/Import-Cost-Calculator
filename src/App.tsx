@@ -428,10 +428,11 @@ export default function App() {
               id="session-title-input"
             />
             <input
-              type="date"
+              type="text"
               value={session.date}
               onChange={(e) => updateSession(prev => ({ ...prev, date: e.target.value }))}
-              className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+              placeholder="YYYY-MM-DD"
+              className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 w-28 text-center"
               id="session-date-input"
             />
             <button
